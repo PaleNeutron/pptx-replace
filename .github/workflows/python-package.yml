@@ -29,6 +29,7 @@ jobs:
         python -m pip install --upgrade pip wheel
         python -m pip install flake8 pytest
         pip install .
+        pip install jinja2 # this is for dataframe.styler
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
