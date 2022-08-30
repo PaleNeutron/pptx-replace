@@ -201,7 +201,7 @@ def replace_shape_with_picture(
         str,
         plt.Figure,
         BinaryIO,
-        alt.Chart,
+        "alt.Chart",
     ],
     auto_reshape: bool = True,
     resize: int = 1,
