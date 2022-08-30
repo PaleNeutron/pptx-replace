@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools >= 61", "setuptools_scm[toml] >= 6.4"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pptx-replace"
+description = "python package for replaceing elemnets in pptx files"
+readme = "README.md"
+authors = [{ name = "John Lyu", email = "paleneutron@outlook.com" }]
+keywords = ["pptx", "image", "replace"]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+
+dynamic = ["version"]
+
+dependencies = [
+    "matplotlib",
+    "altair >= 4.2.0",
+    "pandas",
+    "python-pptx >= 0.6.21",
+    "vega < 3.6",
+    "openpyxl >= 3.0",
+    "selenium<4.3.0",
+    "dataframe_image",
+    "psutil",
+    "altair_saver",
+]
+
+
+[project.urls]
+"Source Code" = "https://github.com/PaleNeutron/pptx-replace"
+
+[project.optional-dependencies]
+
+dev = [
+    "mypy",
+    "flake8 >= 4.0, <5.0",
+    "black >= 22.6.0",
+    "isort >= 5.10.1",
+    "pandas-stubs >= 1.4.3",
+]
+
+test = ["pytest >= 7.1", "pytest-cov >= 3.0.0"]
+
+doc = [
+    "sphinx",
+    "myst-parser",
+    "nbsphinx",
+    # "sphinx-material >= 0.0.35",
+    "pydata-sphinx-theme",
+    "sphinx-autodoc-typehints >= 1.18.3",
+    "sphinx-gallery",
+    # "myst-nb",
+]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "dirty-tag"
+
+[tool.isort]
+skip_gitignore = true
+profile = "black"
+
+[tool.mypy]
+strict = true
+disallow_untyped_calls = false
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = [
+    "matplotlib.*",
+    "altair",
+    "IPython",
+    "pptx",
+    "pptx.*",
+    "dataframe_image",
+    "psutil",
+    "IPython.display",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = ["--strict-config", "--strict-markers"]
