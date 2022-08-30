@@ -14,16 +14,10 @@ requires-python = ">=3.8"
 dynamic = ["version"]
 
 dependencies = [
-    "matplotlib",
-    "altair >= 4.2.0",
-    "pandas",
     "python-pptx >= 0.6.21",
-    "vega < 3.6",
+    "matplotlib",
     "openpyxl >= 3.0",
-    "selenium<4.3.0",
-    "dataframe_image",
-    "psutil",
-    "altair_saver",
+    "pandas",
 ]
 
 
@@ -31,6 +25,13 @@ dependencies = [
 "Source Code" = "https://github.com/PaleNeutron/pptx-replace"
 
 [project.optional-dependencies]
+
+alt = [
+    "altair >= 4.2.0",
+    "vega < 3.6",
+    "altair_saver",
+    "selenium<4.3.0",
+]
 
 dev = [
     "mypy",

@@ -1,25 +1,30 @@
+import inspect
 from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytest
 from pptx import Presentation
 
-from pptx_replace import (
-    replace_text,
-    replace_picture,
-    replace_table,
-)
+from pptx_replace import replace_picture, replace_table, replace_text
 
 
-def test_replace_picture() -> None:
-    # open pptx file
-    prs = Presentation("tests/pptx/test_template.pptx")
-    replace_text(prs, "{report}", "报告正文")
+@pytest.fixture
+def prs():
+    return Presentation("tests/templates/test_template.pptx")
+
+
+def test_replace_text(prs) -> None:
+    replace_text(prs, "{Main title}", "this is main report title")
     slide = prs.slides[1]
     replace_text(slide, "{title}", "This is a title")
-    replace_text(slide, "{subtitle1}", "small title")
+    replace_text(slide, "{content}", "a quick brown fox jumps over the lazy dog\n" * 5)
 
+    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
+
+
+def test_replace_picture(prs) -> None:
     # generate fig
     fig_file = BytesIO()
     plt.plot([1, 2, 3, 4])
@@ -33,19 +38,21 @@ def test_replace_picture() -> None:
     replace_picture(prs.slides[0], fig_file, auto_reshape=True)
 
     # replace the first picture in slide 1
-    plt.bar(list("页面中第几个图片被替换按图片左顶点从上到"), range(10, -10, -1))
+    plt.bar(
+        "picture in slide is replaced in order of top to bottom".split("\n"), range(11)
+    )
     fig = plt.gcf()
     replace_picture(prs.slides[1], fig, auto_reshape=False, order="l2r")
 
     # replace the second picture in slide 1 with out auto_reshape
-    replace_picture(
-        prs.slides[1], fig, pic_number=1, auto_reshape=True, order="l2r"
-    )
+    replace_picture(prs.slides[1], fig, pic_number=1, auto_reshape=True, order="l2r")
+
+    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
 
 
-def test_replace_altair_chart() -> None:
+def test_replace_altair_chart(prs) -> None:
     # open pptx file
-    prs = Presentation("tests/pptx/test_template.pptx")
+    prs = Presentation("tests/templates/test_template.pptx")
     # generate altair chart
     import altair as alt
     import pandas as pd
@@ -67,18 +74,16 @@ def test_replace_altair_chart() -> None:
     replace_picture(
         prs.slides[1], c1 + c2, pic_number=1, auto_reshape=True, order="l2r"
     )
-    prs.save("/tmp/test_template_replaced.pptx")
+    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
 
 
-def test_replace_table() -> None:
+def test_replace_table(prs) -> None:
     # open pptx file
-    prs = Presentation("tests/pptx/test_template.pptx")
+    prs = Presentation("tests/templates/test_template.pptx")
     slide = prs.slides[3]
     # generate table
     df = pd.DataFrame(np.random.rand(6, 10))
     df_styled = df.style.background_gradient()
 
-    replace_picture(slide, df_styled)
-
     replace_table(slide, df_styled)
-    prs.save("/tmp/test_template_replaced.pptx")
+    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
