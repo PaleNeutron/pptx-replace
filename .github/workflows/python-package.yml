@@ -27,8 +27,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel
-        python -m pip install flake8 pytest
-        pip install .
+        pip install ".[alt, test, dev]"
+        apt-get install chromium-chromedriver
         pip install jinja2 # this is for dataframe.styler
     - name: Lint with flake8
       run: |
