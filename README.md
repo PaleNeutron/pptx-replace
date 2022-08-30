@@ -1,10 +1,17 @@
 # pptx-replace
 
-python package for replaceing elemnets in pptx files
+A python package for replaceing text, images and tables in pptx files
 
+```python
+import pptx
+import pptx_replace
 
+prs = Presentation("tests/templates/test_template.pptx")
+replace_text(prs, "{Main title}", "this is main report title")
+slide = prs.slides[1]
+replace_text(slide, "{title}", "This is a title")
+replace_picture(prs.slides[0], "image.png", auto_reshape=True)
 ```
-
 
 ## installation
 
@@ -17,6 +24,7 @@ If you want to put `altair` picture into pptx file, you need install some extra 
 ```bash
 pip install "pptx-replace[alt]"
 ```
+
 see: <https://github.com/altair-viz/altair_saver>
 
 ### extra dependency
@@ -25,8 +33,39 @@ Depends on your usage, if you want to export table and keep style in jupyter, `s
 
 see: <https://github.com/dexplo/dataframe_image/>
 
-## replace picture
+
+## usage
+
+First open your pptx file.
 
 ```python
+import pptx
+import pptx_replace
+
+prs = Presentation("tests/templates/test_template.pptx")
+```
+### replace picture
+
+Replace picture just by matplotlib figuer!
+
+```python
+import matplotlib.pyplot as plt
+
+plt.plot([1, 2, 3, 4])
+fig = plt.gcf()
+
+replace_picture(prs.slides[1], fig, auto_reshape=False, order="l2r")
+```
+
+### replace table
+
+replace table by pandas dataframe
+
+```python
+import pandas as pd
+import numpy as np
+
+df = pd.DataFrame(np.random.rand(6, 10))
+replace_table(slide, df)
 
 ```
