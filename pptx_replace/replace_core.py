@@ -1,4 +1,5 @@
 import html
+from optparse import Option
 import re
 from io import BytesIO, IOBase
 from typing import BinaryIO, List, Literal, Union
@@ -47,7 +48,7 @@ def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: str) -> N
         _replace_text_in_slide(ppt, search_pattern, repl)
 
 
-def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
+def _replace_text_in_slide(slide: Slide, search_str: str, repl: Option[str]=None) -> Slide:
     """Replace text within a page of ppt and keep the format of the corresponding text.
 
     Note that if the text is divided into two formats, it cannot be replaced
@@ -60,6 +61,8 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
     Returns:
         modified slide object
     """
+    if repl is None:
+        repl = ""
     search_pattern = re.compile(re.escape(search_str), re.IGNORECASE)
     for shape in slide.shapes:
         if shape.has_text_frame and not re.search(search_pattern, shape.text) is None:
