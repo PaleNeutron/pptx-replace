@@ -68,9 +68,11 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
             # for m in re.finditer(search_pattern, text_frame.text):
 
             for paragraph in text_frame.paragraphs:
-                for run in paragraph.runs:
-                    if not re.search(search_pattern, run.text) is None:
-                        run.text = re.sub(search_pattern, repl, run.text)
+                # use style of the first run
+                paragraph.runs[0].text = re.sub(search_pattern, repl, shape.text)
+                # remove text in other runs
+                for run in paragraph.runs[1:]:
+                    run.text = ""
     return slide
 
 
