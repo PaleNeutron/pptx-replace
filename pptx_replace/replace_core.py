@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 
-def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: str) -> None:
+def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Option[str]=None) -> None:
     """search and replace text in PowerPoint while preserving formatting
 
     Args:
@@ -41,6 +41,8 @@ def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: str) -> N
     # Useful Links ;)
     # https://stackoverflow.com/questions/37924808/python-pptx-power-point-find-and-replace-text-ctrl-h
     # https://stackoverflow.com/questions/45247042/how-to-keep-original-text-formatting-of-text-with-python-powerpoint
+    if repl is None:
+        repl = ""
     if isinstance(ppt, PrsCls):
         for slide in ppt.slides:
             _replace_text_in_slide(slide, search_pattern, repl)
@@ -48,7 +50,7 @@ def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: str) -> N
         _replace_text_in_slide(ppt, search_pattern, repl)
 
 
-def _replace_text_in_slide(slide: Slide, search_str: str, repl: Option[str]=None) -> Slide:
+def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
     """Replace text within a page of ppt and keep the format of the corresponding text.
 
     Note that if the text is divided into two formats, it cannot be replaced
@@ -61,8 +63,6 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: Option[str]=None
     Returns:
         modified slide object
     """
-    if repl is None:
-        repl = ""
     search_pattern = re.compile(re.escape(search_str), re.IGNORECASE)
     for shape in slide.shapes:
         if shape.has_text_frame and not re.search(search_pattern, shape.text) is None:
