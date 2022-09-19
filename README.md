@@ -44,6 +44,23 @@ import pptx_replace
 
 prs = Presentation("tests/templates/test_template.pptx")
 ```
+
+
+### replace text
+
+Replace any text in your ppt
+
+```python
+# repalce all occurances of {Main title} in pptx
+replace_text(prs, "{Main title}", "this is main report title")
+slide = prs.slides[1]
+
+# replace in just one slide
+replace_text(slide, "{title}", "This is a title")
+
+replace_text(slide, "{content}", "a quick brown fox jumps over the lazy dog\n" * 5)
+```
+
 ### replace picture
 
 Replace picture just by matplotlib figuer!
