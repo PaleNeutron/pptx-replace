@@ -1,8 +1,7 @@
 import html
-from optparse import Option
 import re
 from io import BytesIO, IOBase
-from typing import BinaryIO, List, Literal, Union
+from typing import BinaryIO, List, Literal, Union, Optional
 
 try:
     import altair as alt
@@ -27,7 +26,7 @@ __all__ = [
 ]
 
 
-def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Option[str]=None) -> None:
+def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str]=None) -> None:
     """search and replace text in PowerPoint while preserving formatting
 
     Args:
