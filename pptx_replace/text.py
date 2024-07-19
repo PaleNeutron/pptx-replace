@@ -1,4 +1,4 @@
-from pptx import TextFrame
+from pptx.text.text import TextFrame
 
 
 def set_frame_text(frame: TextFrame, text: str):
