@@ -1,20 +1,20 @@
 from pptx.text.text import TextFrame
 
 
-def set_frame_text(frame: TextFrame, text: str):
+def set_frame_text(text_frame: TextFrame, text: str):
     """set text and keep font style"""
-    pgs = frame.paragraphs
-    if pgs:
-        runs = pgs[0].runs
-        if runs:
-            font = runs[0].font
-    else:
-        font = None
+    replaced = False
+    for paragraph in text_frame.paragraphs:
+        # use style of the first run
+        if paragraph.runs:
+            if not replaced:
+                paragraph.runs[0].text = text
+                # remove text in other runs
+                replaced = True
+                for run in paragraph.runs[1:]:
+                    run.text = ""
+            else:
+                paragraph.clear()
 
-    frame.clear()
-    frame.text = text
-    if font:
-        for p in frame.paragraphs:
-            for r in p.runs:
-                r.font = font
-    return frame
+    if not replaced:
+        text_frame.text = text

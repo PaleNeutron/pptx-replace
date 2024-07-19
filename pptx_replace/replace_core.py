@@ -1,7 +1,9 @@
 import html
 import re
 from io import BytesIO, IOBase
-from typing import BinaryIO, List, Literal, Union, Optional
+from typing import BinaryIO, List, Literal, Optional, Union
+
+from pptx_replace.text import set_frame_text
 
 try:
     import altair as alt
@@ -69,17 +71,8 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
             # shape.text_frame.text = re.sub(search_pattern, repl, shape.text_frame.text)
             # for m in re.finditer(search_pattern, text_frame.text):
             replaced = False
-            for paragraph in text_frame.paragraphs:
-                # use style of the first run
-                if paragraph.runs:
-                    if not replaced:
-                        paragraph.runs[0].text = re.sub(search_pattern, repl, shape.text)
-                        # remove text in other runs
-                        replaced = True
-                        for run in paragraph.runs[1:]:
-                            run.text = ""
-                    else:
-                        paragraph.clear()
+            new_text = re.sub(search_pattern, repl, shape.text)
+            set_frame_text(text_frame, new_text)
     return slide
 
 
