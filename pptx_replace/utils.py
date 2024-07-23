@@ -9,12 +9,16 @@ def get_shape(
     slide: Slide,
     pic_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
-    shape_type: Literal["picture", "table"] = "picture",
+    shape_type: Literal["picture", "table", "chart", "text_frame"] = "picture",
 ) -> BaseShape:
     if shape_type == "picture":
         _ele = [shape for shape in slide.shapes if isinstance(shape, Picture)]
     elif shape_type == "table":
         _ele = [shape for shape in slide.shapes if shape.has_table]
+    elif shape_type == "chart":
+        _ele = [shape for shape in slide.shapes if shape.has_chart]
+    elif shape_type == "text_frame":
+        _ele = [shape for shape in slide.shapes if shape.has_text_frame]
 
     if order == "t2b":
         ordered_shapes = sorted(
