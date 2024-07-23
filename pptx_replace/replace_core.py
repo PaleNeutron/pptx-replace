@@ -66,11 +66,11 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
     """
     search_pattern = re.compile(re.escape(search_str), re.IGNORECASE)
     for shape in slide.shapes:
-        if shape.has_text_frame and not re.search(search_pattern, shape.text) is None:
+        if shape.has_text_frame and re.search(search_pattern, shape.text) is not None:
             text_frame = shape.text_frame
             # shape.text_frame.text = re.sub(search_pattern, repl, shape.text_frame.text)
             # for m in re.finditer(search_pattern, text_frame.text):
-            replaced = False
+            # replaced = False
             new_text = re.sub(search_pattern, repl, shape.text)
             set_frame_text(text_frame, new_text)
     return slide
