@@ -9,19 +9,29 @@ from pptx import Presentation
 
 from pptx_replace import replace_picture, replace_table, replace_text
 
+out_dir = "./tests/output"
 
 @pytest.fixture
 def prs():
     return Presentation("tests/templates/test_template.pptx")
 
+@pytest.fixture(autouse=True)
+def ensure_output_dir():
+    import os
+
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    
 
 def test_replace_text(prs) -> None:
-    replace_text(prs, "{Main title}", "this is main report title")
+    replace_text(prs, "{main title}", "this is main report title")
     slide = prs.slides[1]
     replace_text(slide, "{title}", "This is a title")
     replace_text(slide, "{content}", "a quick brown fox jumps over the lazy dog\n" * 5)
+    replace_text(prs, "{cell_content1}", "3.5%")
+    replace_text(prs, "{cell_content2}", "42")
 
-    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
+    prs.save(f"{out_dir}/{inspect.stack()[0][3]}.pptx")
 
 
 def test_replace_picture(prs) -> None:
@@ -47,7 +57,7 @@ def test_replace_picture(prs) -> None:
     # replace the second picture in slide 1 with out auto_reshape
     replace_picture(prs.slides[1], fig, pic_number=1, auto_reshape=True, order="l2r")
 
-    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
+    prs.save(f"{out_dir}/{inspect.stack()[0][3]}.pptx")
 
 
 def test_replace_altair_chart(prs) -> None:
@@ -74,7 +84,7 @@ def test_replace_altair_chart(prs) -> None:
     replace_picture(
         prs.slides[1], c1 + c2, pic_number=1, auto_reshape=True, order="l2r"
     )
-    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
+    prs.save(f"{out_dir}/{inspect.stack()[0][3]}.pptx")
 
 
 def test_replace_table(prs) -> None:
@@ -86,4 +96,4 @@ def test_replace_table(prs) -> None:
     df_styled = df.style.background_gradient()
 
     replace_table(slide, df_styled)
-    prs.save(f"/tmp/{inspect.stack()[0][3]}.pptx")
+    prs.save(f"{out_dir}/{inspect.stack()[0][3]}.pptx")

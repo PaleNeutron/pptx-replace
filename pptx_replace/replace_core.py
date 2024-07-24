@@ -3,6 +3,8 @@ import re
 from io import BytesIO, IOBase
 from typing import BinaryIO, List, Literal, Optional, Union
 
+from python_docx_replace import Paragraph as DocParagraph
+
 from pptx_replace.text import set_frame_text
 
 try:
@@ -26,6 +28,19 @@ __all__ = [
     "replace_picture",
     "replace_table",
 ]
+
+def get_all_paragraphs(slide: Slide):
+    # get from shapes
+    for shape in slide.shapes:
+        if shape.has_text_frame:
+            yield from shape.text_frame.paragraphs
+    # get from tables
+    for shape in slide.shapes:
+        if shape.has_table:
+            for row in shape.table.rows:
+                for cell in row.cells:
+                    yield from cell.text_frame.paragraphs
+
 
 
 def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str]=None) -> None:
@@ -54,27 +69,18 @@ def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[
 def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
     """Replace text within a page of ppt and keep the format of the corresponding text.
 
-    Note that if the text is divided into two formats, it cannot be replaced
-
     Args:
         slide: slide object
-        search_pattern: pattern to search
+        search_pattern: text to search
         repl: replacement string
 
     Returns:
         modified slide object
     """
-    search_pattern = re.compile(re.escape(search_str), re.IGNORECASE)
-    for shape in slide.shapes:
-        if shape.has_text_frame and re.search(search_pattern, shape.text) is not None:
-            text_frame = shape.text_frame
-            # shape.text_frame.text = re.sub(search_pattern, repl, shape.text_frame.text)
-            # for m in re.finditer(search_pattern, text_frame.text):
-            # replaced = False
-            new_text = re.sub(search_pattern, repl, shape.text)
-            set_frame_text(text_frame, new_text)
-    return slide
-
+    paragraphs = get_all_paragraphs(slide)
+    for p in paragraphs:
+        dp = DocParagraph(p)
+        dp.replace_key(search_str, repl)
 
 def replace_picture(
     slide: Slide,

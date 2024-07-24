@@ -19,6 +19,7 @@ dependencies = [
     "openpyxl >= 3.0",
     "pandas",
     "numpy>=1.6",
+    "python-docx-replace"
 ]
 
 
