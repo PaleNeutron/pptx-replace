@@ -273,11 +273,12 @@ def replace_table(
             # tc = copy.deepcopy(shape.table.cell(-1, -1)._tc)
             # new_shape.table.cell(r+1, c)._tc = tc
             if isinstance(data, pd.DataFrame):
-                shape.table.cell(r + 1, c + 1).text = str(df.iloc[r, c])
+                text = str(df.iloc[r, c])
             else:
-                shape.table.cell(r + 1, c + 1).text = html.unescape(
+                text = html.unescape(
                     pandas_styles["body"][r][c]["display_value"]
                 )
+            set_frame_text(shape.table.cell(r + 1, c + 1).text_frame, text)
     # set font
     if font is not None:
         for r in range(rn + 1):
