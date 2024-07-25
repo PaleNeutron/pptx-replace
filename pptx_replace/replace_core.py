@@ -189,7 +189,7 @@ def replace_table(
         font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
     # t = shape.table
     rn, cn = df.shape
-    new_shape = slide.shapes.add_table(rn + 1, cn, x, y, cx, cy)
+    new_shape = slide.shapes.add_table(rn + 1, cn + 1, x, y, cx, cy)
 
     # add headers
     for c in range(cn):
