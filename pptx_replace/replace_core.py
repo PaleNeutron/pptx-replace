@@ -194,9 +194,9 @@ def replace_table(
     # add headers
     for c in range(cn):
         if isinstance(data, pd.DataFrame):
-            new_shape.table.cell(0, c).text = str(df.columns[c])
+            new_shape.table.cell(0, c + 1).text = str(df.columns[c])
         else:
-            new_shape.table.cell(0, c).text = html.unescape(
+            new_shape.table.cell(0, c + 1).text = html.unescape(
             pandas_styles["head"][0][c]["display_value"]
         )
     # add index
