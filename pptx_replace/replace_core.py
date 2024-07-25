@@ -241,7 +241,7 @@ def replace_table(
             add_row(shape.table)
     elif rn + 1 < len(shape.table.rows):
         for _ in range(len(shape.table.rows) - rn - 1):
-            remove_row(shape.table, shape.table.rows[-1])
+            remove_row(shape.table, shape.table.rows[len(shape.table.rows) - 1])
     if cn + 1 > len(shape.table.columns):
         for _ in range(cn + 1 - len(shape.table.columns)):
             add_column(shape.table)
