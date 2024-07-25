@@ -150,6 +150,7 @@ def replace_table(
     ],
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
+    font = None,
 ) -> BaseShape:
     """Replace table in PPT in a page
 
@@ -184,6 +185,8 @@ def replace_table(
         shape.width,
         shape.height,
     )
+    if font is None:
+        font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
     # t = shape.table
     rn, cn = df.shape
     new_shape = slide.shapes.add_table(rn + 1, cn, x, y, cx, cy)
@@ -215,6 +218,16 @@ def replace_table(
                 new_shape.table.cell(r + 1, c + 1).text = html.unescape(
                     pandas_styles["body"][r][c]["display_value"]
                 )
+    # set font
+    for r in range(rn + 1):
+        for c in range(cn):
+            for p in new_shape.table.cell(r, c).text_frame.paragraphs:
+                for run in p.runs:
+                    run.font.bold = font.bold
+                    run.font.italic = font.italic
+                    run.font.size = font.size
+                    run.font.name = font.name
+                    run.font.underline = font.underline
     old_shape = shape._element
     new_element = new_shape._element
     old_shape.addnext(new_element)
