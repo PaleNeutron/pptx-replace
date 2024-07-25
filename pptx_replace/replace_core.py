@@ -51,7 +51,7 @@ def add_row(table: Table) -> _Row:
 
     for tc in new_row.tc_lst:
         cell = _Cell(tc, new_row.tc_lst)
-        cell.text = ""  # defaulting cell contents to empty text
+        set_frame_text(cell.text_frame, '')
 
     table._tbl.append(new_row)
     return table.rows[-1]
@@ -76,7 +76,7 @@ def add_column(table: Table) -> _Column:
         tr.append(new_tc)
 
         cell = _Cell(new_tc, tr.tc_lst)
-        cell.text = ''
+        set_frame_text(cell.text_frame, '')
 
     return _Column(new_col, table)
 
