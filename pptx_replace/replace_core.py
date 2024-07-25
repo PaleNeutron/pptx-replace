@@ -247,7 +247,7 @@ def replace_table(
             add_column(shape.table)
     elif cn + 1 < len(shape.table.columns):
         for _ in range(len(shape.table.columns) - cn - 1):
-            remove_column(shape.table, shape.table.columns[-1])
+            remove_column(shape.table)
 
     # add headers
     for c in range(cn):
