@@ -45,13 +45,14 @@ def get_all_paragraphs(slide: Slide):
                 for cell in row.cells:
                     yield from cell.text_frame.paragraphs
 
+
 def add_row(table: Table) -> _Row:
     new_row = deepcopy(table._tbl.tr_lst[-1])
     # duplicating last row of the table as a new row to be added
 
     for tc in new_row.tc_lst:
         cell = _Cell(tc, new_row.tc_lst)
-        set_frame_text(cell.text_frame, '')
+        set_frame_text(cell.text_frame, "")
 
     table._tbl.append(new_row)
     return table.rows[-1]
@@ -76,15 +77,17 @@ def add_column(table: Table) -> _Column:
         tr.append(new_tc)
 
         cell = _Cell(new_tc, tr.tc_lst)
-        set_frame_text(cell.text_frame, '')
+        set_frame_text(cell.text_frame, "")
 
     return _Column(new_col, table)
+
 
 def remove_column(table, column):
     col_idx = table._tbl.tblGrid.index(column._gridCol)
     for tr in table._tbl.tr_lst:
         tr.remove(tr.tc_lst[col_idx])
     table._tbl.tblGrid.remove(column._gridCol)
+
 
 def replace_text(
     ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str] = None
@@ -247,25 +250,23 @@ def replace_table(
             add_column(shape.table)
     elif cn + 1 < len(shape.table.columns):
         for _ in range(len(shape.table.columns) - cn - 1):
-            remove_column(shape.table, shape.table.columns[len(shape.table.columns) - 1])
+            remove_column(
+                shape.table, shape.table.columns[len(shape.table.columns) - 1]
+            )
 
     # add headers
     for c in range(cn):
         if isinstance(data, pd.DataFrame):
             text = str(df.columns[c])
         else:
-            text = html.unescape(
-                pandas_styles["head"][0][c]["display_value"]
-            )
+            text = html.unescape(pandas_styles["head"][0][c]["display_value"])
         set_frame_text(shape.table.cell(0, c + 1).text_frame, text)
     # add index
     for r in range(rn):
         if isinstance(data, pd.DataFrame):
             text = str(df.index[r])
         else:
-            text = html.unescape(
-                pandas_styles["body"][r][0]["display_value"]
-            )
+            text = html.unescape(pandas_styles["body"][r][0]["display_value"])
         set_frame_text(shape.table.cell(r + 1, 0).text_frame, text)
     # add body
     for r in range(rn):
@@ -275,9 +276,7 @@ def replace_table(
             if isinstance(data, pd.DataFrame):
                 text = str(df.iloc[r, c])
             else:
-                text = html.unescape(
-                    pandas_styles["body"][r][c]["display_value"]
-                )
+                text = html.unescape(pandas_styles["body"][r][c]["display_value"])
             set_frame_text(shape.table.cell(r + 1, c + 1).text_frame, text)
     # set font
     if font is not None:
@@ -310,20 +309,18 @@ def replace_table_cells(
         df = pd.DataFrame(data)
     else:
         df = data
-    min_col = min(len(df.columns), len(shape.table.columns) - 1)
-    min_row = min(len(df.index), len(shape.table.rows) - 1)
+    col_limit = min(len(df.columns), len(shape.table.columns) - 1) + 1
+    row_limit = min(len(df.index), len(shape.table.rows) - 1) + 1
     if replace_headers:
-        for c in range(1, min_col):
+        for c in range(1, col_limit):
             set_frame_text(shape.table.cell(0, c).text_frame, str(df.columns[c]))
     if replace_index:
-        for r in range(1, min_row):
+        for r in range(1, row_limit):
             set_frame_text(shape.table.cell(r, 0).text_frame, str(df.index[r]))
 
-    for r in range(1, min_row):
-        for c in range(1, min_col):
-            set_frame_text(
-                shape.table.cell(r, c).text_frame, str(df.iloc[r, c])
-            )
+    for r in range(1, row_limit):
+        for c in range(1, col_limit):
+            set_frame_text(shape.table.cell(r, c).text_frame, str(df.iloc[r, c]))
     return shape
 
 
