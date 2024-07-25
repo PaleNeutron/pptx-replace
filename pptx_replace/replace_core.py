@@ -94,7 +94,7 @@ def replace_picture(
     pic_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
     auto_reshape: bool = True,
-) -> None:
+) -> BaseShape:
     """Replace pictures in PPT in a page
 
     Args:
@@ -109,7 +109,8 @@ def replace_picture(
         order,
         shape_type="picture",
     )
-    replace_shape_with_picture(shape, fig, auto_reshape)
+    new_shape = replace_shape_with_picture(shape, fig, auto_reshape)
+    return new_shape
 
 
 # def copy_row_insert_after(
@@ -149,7 +150,7 @@ def replace_table(
     ],
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
-) -> None:
+) -> BaseShape:
     """Replace table in PPT in a page
 
     Args:
@@ -197,9 +198,10 @@ def replace_table(
                 pandas_styles["body"][r][c]["display_value"]
             )
     old_shape = shape._element
-    new_pic = new_shape._element
-    old_shape.addnext(new_pic)
+    new_element = new_shape._element
+    old_shape.addnext(new_element)
     old_shape.getparent().remove(old_shape)
+    return new_shape
 
 def replace_table_cells(
     shape: BaseShape,
@@ -209,17 +211,17 @@ def replace_table_cells(
     ],
     replace_headers: bool = True,
     replace_index: bool = True,
-):
+) -> BaseShape:
     if isinstance(data, List):
         df = pd.DataFrame(data)
     else:
         df = data
+    min_col = min(len(df.columns), len(shape.table.columns) -1 )
+    min_row = min(len(df.index), len(shape.table.rows) -1 )
     if replace_headers:
-        min_col = min(len(df.columns), shape.table.columns)
         for c in range(1, min_col):
             set_frame_text(shape.table.cell(0, c).text_frame, str(df.columns[c]))
     if replace_index:
-        min_row = min(len(df.index), shape.table.rows)
         for r in range(1, min_row):
             set_frame_text(shape.table.cell(r, 0).text_frame, str(df.index[r]))
     
@@ -239,7 +241,7 @@ def replace_shape_with_picture(
     ],
     auto_reshape: bool = True,
     resize: int = 1,
-) -> None:
+) -> BaseShape:
     # prepare figure
     if isinstance(fig, str) or isinstance(fig, IOBase):
         figio = fig
@@ -278,3 +280,4 @@ def replace_shape_with_picture(
     new_pic = new_shape._element
     old_pic.addnext(new_pic)
     old_pic.getparent().remove(old_pic)
+    return new_shape
