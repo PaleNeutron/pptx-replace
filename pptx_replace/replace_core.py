@@ -201,6 +201,32 @@ def replace_table(
     old_shape.addnext(new_pic)
     old_shape.getparent().remove(old_shape)
 
+def replace_table_cells(
+    shape: BaseShape,
+    data: Union[
+        pd.DataFrame,
+        List[List[Union[float, str]]],
+    ],
+    replace_headers: bool = True,
+    replace_index: bool = True,
+):
+    if isinstance(data, List):
+        df = pd.DataFrame(data)
+    else:
+        df = data
+    if replace_headers:
+        min_col = min(len(df.columns), shape.table.columns)
+        for c in range(1, min_col):
+            set_frame_text(shape.table.cell(0, c).text_frame, str(df.columns[c]))
+    if replace_index:
+        min_row = min(len(df.index), shape.table.rows)
+        for r in range(1, min_row):
+            set_frame_text(shape.table.cell(r, 0).text_frame, str(df.index[r]))
+    
+    for r in range(1, min_row):
+        for c in range(1, min_col):
+            set_frame_text(shape.table.cell(r+1, c+1).text_frame, str(df.iloc[r, c]))
+    return shape
 
 def replace_shape_with_picture(
     shape: BaseShape,
