@@ -1,8 +1,11 @@
 import html
 import re
+from copy import deepcopy
 from io import BytesIO, IOBase
 from typing import BinaryIO, List, Literal, Optional, Union
 
+from pptx.oxml.xmlchemy import OxmlElement
+from pptx.table import Table, _Cell, _Column, _Row
 from python_docx_replace import Paragraph as DocParagraph
 
 from pptx_replace.text import set_frame_text
@@ -29,6 +32,7 @@ __all__ = [
     "replace_table",
 ]
 
+
 def get_all_paragraphs(slide: Slide):
     # get from shapes
     for shape in slide.shapes:
@@ -41,10 +45,40 @@ def get_all_paragraphs(slide: Slide):
                 for cell in row.cells:
                     yield from cell.text_frame.paragraphs
 
-def remove_row(table, row):
-    tbl = table._tbl
-    tr = row._tr
-    tbl.remove(tr)
+def add_row(table: Table) -> _Row:
+    new_row = deepcopy(table._tbl.tr_lst[-1])
+    # duplicating last row of the table as a new row to be added
+
+    for tc in new_row.tc_lst:
+        cell = _Cell(tc, new_row.tc_lst)
+        cell.text = ""  # defaulting cell contents to empty text
+
+    table._tbl.append(new_row)
+    return table.rows[-1]
+
+
+def remove_row(table: Table, row_to_delete: _Row) -> None:
+    table._tbl.remove(row_to_delete._tr)
+
+
+def add_column(table: Table) -> _Column:
+    """
+    Duplicates last column to keep formatting and resets it's cells text_frames
+    (e.g. ``column = table.columns.add_column()``).
+    Returns new |_Column| instance.
+    """
+    new_col = deepcopy(table._tbl.tblGrid.gridCol_lst[-1])
+    table._tbl.tblGrid.append(new_col)  # copies last grid element
+
+    for tr in table._tbl.tr_lst:
+        # duplicate last cell of each row
+        new_tc = deepcopy(tr.tc_lst[-1])
+        tr.append(new_tc)
+
+        cell = _Cell(new_tc, tr.tc_lst)
+        cell.text = ''
+
+    return _Column(new_col, table)
 
 def remove_column(table, column):
     col_idx = table._tbl.tblGrid.index(column._gridCol)
@@ -52,7 +86,9 @@ def remove_column(table, column):
         tr.remove(tr.tc_lst[col_idx])
     table._tbl.tblGrid.remove(column._gridCol)
 
-def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str]=None) -> None:
+def replace_text(
+    ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str] = None
+) -> None:
     """search and replace text in PowerPoint while preserving formatting
 
     Args:
@@ -90,6 +126,7 @@ def _replace_text_in_slide(slide: Slide, search_str: str, repl: str) -> Slide:
     for p in paragraphs:
         dp = DocParagraph(p)
         dp.replace_key(search_str, repl)
+
 
 def replace_picture(
     slide: Slide,
@@ -159,7 +196,7 @@ def replace_table(
     ],
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
-    font = None,
+    font=None,
 ) -> BaseShape:
     """Replace table in PPT in a page
 
@@ -187,28 +224,27 @@ def replace_table(
         df = data
     else:
         raise ValueError(f"{type(data)} {repr(data)} is not supported")
-    
+
     # x, y, cx, cy = (
     #     shape.left,
     #     shape.top,
     #     shape.width,
     #     shape.height,
     # )
-    if font is None:
-        font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
+
     # t = shape.table
     rn, cn = df.shape
     # shape = slide.shapes.add_table(rn + 1, cn + 1, x, y, cx, cy)
     # alt table rows and columns to meet dataframe shape
     if rn + 1 > len(shape.table.rows):
         for _ in range(rn + 1 - len(shape.table.rows)):
-            shape.table.rows.add()
+            add_row(shape.table)
     elif rn + 1 < len(shape.table.rows):
         for _ in range(len(shape.table.rows) - rn - 1):
             remove_row(shape.table, shape.table.rows[-1])
     if cn + 1 > len(shape.table.columns):
         for _ in range(cn + 1 - len(shape.table.columns)):
-            shape.table.columns.add()
+            add_column(shape.table)
     elif cn + 1 < len(shape.table.columns):
         for _ in range(len(shape.table.columns) - cn - 1):
             remove_column(shape.table, shape.table.columns[-1])
@@ -219,8 +255,8 @@ def replace_table(
             shape.table.cell(0, c + 1).text = str(df.columns[c])
         else:
             shape.table.cell(0, c + 1).text = html.unescape(
-            pandas_styles["head"][0][c]["display_value"]
-        )
+                pandas_styles["head"][0][c]["display_value"]
+            )
     # add index
     for r in range(rn):
         if isinstance(data, pd.DataFrame):
@@ -241,6 +277,8 @@ def replace_table(
                     pandas_styles["body"][r][c]["display_value"]
                 )
     # set font
+    if font is None:
+        font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
     for r in range(rn + 1):
         for c in range(cn):
             for p in shape.table.cell(r, c).text_frame.paragraphs:
@@ -256,6 +294,7 @@ def replace_table(
     old_shape.getparent().remove(old_shape)
     return shape
 
+
 def replace_table_cells(
     shape: BaseShape,
     data: Union[
@@ -269,19 +308,22 @@ def replace_table_cells(
         df = pd.DataFrame(data)
     else:
         df = data
-    min_col = min(len(df.columns), len(shape.table.columns) -1 )
-    min_row = min(len(df.index), len(shape.table.rows) -1 )
+    min_col = min(len(df.columns), len(shape.table.columns) - 1)
+    min_row = min(len(df.index), len(shape.table.rows) - 1)
     if replace_headers:
         for c in range(1, min_col):
             set_frame_text(shape.table.cell(0, c).text_frame, str(df.columns[c]))
     if replace_index:
         for r in range(1, min_row):
             set_frame_text(shape.table.cell(r, 0).text_frame, str(df.index[r]))
-    
+
     for r in range(1, min_row):
         for c in range(1, min_col):
-            set_frame_text(shape.table.cell(r+1, c+1).text_frame, str(df.iloc[r, c]))
+            set_frame_text(
+                shape.table.cell(r + 1, c + 1).text_frame, str(df.iloc[r, c])
+            )
     return shape
+
 
 def replace_shape_with_picture(
     shape: BaseShape,
