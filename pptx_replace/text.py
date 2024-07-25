@@ -1,6 +1,12 @@
 from pptx.text.text import TextFrame
 
 
+def delete_paragraph(paragraph):
+    p = paragraph._p
+    parent_element = p.getparent()
+    parent_element.remove(p)
+
+
 def set_frame_text(text_frame: TextFrame, text: str):
     """set text and keep font style"""
     replaced = False
@@ -14,7 +20,7 @@ def set_frame_text(text_frame: TextFrame, text: str):
                 for run in paragraph.runs[1:]:
                     run.text = ""
             else:
-                paragraph.clear()
+                delete_paragraph(paragraph)
 
     if not replaced:
         text_frame.text = text
