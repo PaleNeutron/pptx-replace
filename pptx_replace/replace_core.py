@@ -41,7 +41,16 @@ def get_all_paragraphs(slide: Slide):
                 for cell in row.cells:
                     yield from cell.text_frame.paragraphs
 
+def remove_row(table, row):
+    tbl = table._tbl
+    tr = row._tr
+    tbl.remove(tr)
 
+def remove_column(table, column):
+    col_idx = table._tbl.tblGrid.index(column._gridCol)
+    for tr in table._tbl.tr_lst:
+        tr.remove(tr.tc_lst[col_idx])
+    table._tbl.tblGrid.remove(column._gridCol)
 
 def replace_text(ppt: Union[PrsCls, Slide], search_pattern: str, repl: Optional[str]=None) -> None:
     """search and replace text in PowerPoint while preserving formatting
@@ -179,32 +188,45 @@ def replace_table(
     else:
         raise ValueError(f"{type(data)} {repr(data)} is not supported")
     
-    x, y, cx, cy = (
-        shape.left,
-        shape.top,
-        shape.width,
-        shape.height,
-    )
+    # x, y, cx, cy = (
+    #     shape.left,
+    #     shape.top,
+    #     shape.width,
+    #     shape.height,
+    # )
     if font is None:
         font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
     # t = shape.table
     rn, cn = df.shape
-    new_shape = slide.shapes.add_table(rn + 1, cn + 1, x, y, cx, cy)
+    # shape = slide.shapes.add_table(rn + 1, cn + 1, x, y, cx, cy)
+    # alt table rows and columns to meet dataframe shape
+    if rn + 1 > len(shape.table.rows):
+        for _ in range(rn + 1 - len(shape.table.rows)):
+            shape.table.rows.add()
+    elif rn + 1 < len(shape.table.rows):
+        for _ in range(len(shape.table.rows) - rn - 1):
+            remove_row(shape.table, shape.table.rows[-1])
+    if cn + 1 > len(shape.table.columns):
+        for _ in range(cn + 1 - len(shape.table.columns)):
+            shape.table.columns.add()
+    elif cn + 1 < len(shape.table.columns):
+        for _ in range(len(shape.table.columns) - cn - 1):
+            remove_column(shape.table, shape.table.columns[-1])
 
     # add headers
     for c in range(cn):
         if isinstance(data, pd.DataFrame):
-            new_shape.table.cell(0, c + 1).text = str(df.columns[c])
+            shape.table.cell(0, c + 1).text = str(df.columns[c])
         else:
-            new_shape.table.cell(0, c + 1).text = html.unescape(
+            shape.table.cell(0, c + 1).text = html.unescape(
             pandas_styles["head"][0][c]["display_value"]
         )
     # add index
     for r in range(rn):
         if isinstance(data, pd.DataFrame):
-            new_shape.table.cell(r + 1, 0).text = str(df.index[r])
+            shape.table.cell(r + 1, 0).text = str(df.index[r])
         else:
-            new_shape.table.cell(r + 1, 0).text = html.unescape(
+            shape.table.cell(r + 1, 0).text = html.unescape(
                 pandas_styles["body"][r][0]["display_value"]
             )
     # add body
@@ -213,15 +235,15 @@ def replace_table(
             # tc = copy.deepcopy(shape.table.cell(-1, -1)._tc)
             # new_shape.table.cell(r+1, c)._tc = tc
             if isinstance(data, pd.DataFrame):
-                new_shape.table.cell(r + 1, c + 1).text = str(df.iloc[r, c])
+                shape.table.cell(r + 1, c + 1).text = str(df.iloc[r, c])
             else:
-                new_shape.table.cell(r + 1, c + 1).text = html.unescape(
+                shape.table.cell(r + 1, c + 1).text = html.unescape(
                     pandas_styles["body"][r][c]["display_value"]
                 )
     # set font
     for r in range(rn + 1):
         for c in range(cn):
-            for p in new_shape.table.cell(r, c).text_frame.paragraphs:
+            for p in shape.table.cell(r, c).text_frame.paragraphs:
                 for run in p.runs:
                     run.font.bold = font.bold
                     run.font.italic = font.italic
@@ -229,10 +251,10 @@ def replace_table(
                     run.font.name = font.name
                     run.font.underline = font.underline
     old_shape = shape._element
-    new_element = new_shape._element
+    new_element = shape._element
     old_shape.addnext(new_element)
     old_shape.getparent().remove(old_shape)
-    return new_shape
+    return shape
 
 def replace_table_cells(
     shape: BaseShape,
