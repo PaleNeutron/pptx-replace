@@ -190,7 +190,10 @@ def replace_table(
 
     # add headers
     for c in range(cn):
-        new_shape.table.cell(0, c).text = html.unescape(
+        if isinstance(data, pd.DataFrame):
+            new_shape.table.cell(0, c).text = str(df.columns[c])
+        else:
+            new_shape.table.cell(0, c).text = html.unescape(
             pandas_styles["head"][0][c]["display_value"]
         )
     # add body
@@ -198,9 +201,12 @@ def replace_table(
         for c in range(cn):
             # tc = copy.deepcopy(shape.table.cell(-1, -1)._tc)
             # new_shape.table.cell(r+1, c)._tc = tc
-            new_shape.table.cell(r + 1, c).text = html.unescape(
-                pandas_styles["body"][r][c]["display_value"]
-            )
+            if isinstance(data, pd.DataFrame):
+                new_shape.table.cell(r + 1, c).text = str(df.iloc[r, c])
+            else:
+                new_shape.table.cell(r + 1, c).text = html.unescape(
+                    pandas_styles["body"][r][c]["display_value"]
+                )
     old_shape = shape._element
     new_element = new_shape._element
     old_shape.addnext(new_element)
