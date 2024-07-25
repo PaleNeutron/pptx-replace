@@ -196,15 +196,23 @@ def replace_table(
             new_shape.table.cell(0, c).text = html.unescape(
             pandas_styles["head"][0][c]["display_value"]
         )
+    # add index
+    for r in range(rn):
+        if isinstance(data, pd.DataFrame):
+            new_shape.table.cell(r + 1, 0).text = str(df.index[r])
+        else:
+            new_shape.table.cell(r + 1, 0).text = html.unescape(
+                pandas_styles["body"][r][0]["display_value"]
+            )
     # add body
     for r in range(rn):
         for c in range(cn):
             # tc = copy.deepcopy(shape.table.cell(-1, -1)._tc)
             # new_shape.table.cell(r+1, c)._tc = tc
             if isinstance(data, pd.DataFrame):
-                new_shape.table.cell(r + 1, c).text = str(df.iloc[r, c])
+                new_shape.table.cell(r + 1, c + 1).text = str(df.iloc[r, c])
             else:
-                new_shape.table.cell(r + 1, c).text = html.unescape(
+                new_shape.table.cell(r + 1, c + 1).text = html.unescape(
                     pandas_styles["body"][r][c]["display_value"]
                 )
     old_shape = shape._element
