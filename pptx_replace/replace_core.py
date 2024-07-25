@@ -320,8 +320,9 @@ def replace_table_cells(
 
     for r in range(1, row_limit):
         for c in range(1, col_limit):
-            set_frame_text(shape.table.cell(r, c).text_frame, str(df.iloc[r, c]))
+            set_frame_text(shape.table.cell(r, c).text_frame, str(df.iloc[r - 1, c - 1]))
     return shape
+
 
 
 def replace_shape_with_picture(
