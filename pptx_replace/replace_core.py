@@ -200,8 +200,8 @@ def replace_table(
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
     font=None,
-    resize_x: bool = True,
-    resize_y: bool = True,
+    resize_x: bool = False,
+    resize_y: bool = False,
 ) -> BaseShape:
     """Replace table in PPT in a page
 
