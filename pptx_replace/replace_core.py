@@ -228,12 +228,12 @@ def replace_table(
     else:
         raise ValueError(f"{type(data)} {repr(data)} is not supported")
 
-    # x, y, cx, cy = (
-    #     shape.left,
-    #     shape.top,
-    #     shape.width,
-    #     shape.height,
-    # )
+    x, y, cx, cy = (
+        shape.left,
+        shape.top,
+        shape.width,
+        shape.height,
+    )
 
     # t = shape.table
     rn, cn = df.shape
@@ -289,6 +289,10 @@ def replace_table(
                         run.font.size = font.size
                         run.font.name = font.name
                         run.font.underline = font.underline
+    # resize shape
+    shape.width = cx
+    shape.height = cy
+     
     # old_shape = shape._element
     # new_element = shape._element
     # old_shape.addnext(new_element)
