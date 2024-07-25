@@ -169,10 +169,15 @@ def replace_table(
     if isinstance(data, List):
         df = pd.DataFrame(data)
 
-    if isinstance(data, Styler):
+    elif isinstance(data, Styler):
         data._compute()  # type: ignore
         pandas_styles = data._translate(False, False)  # type: ignore
         df = data.data  # type: ignore
+    elif isinstance(data, pd.DataFrame):
+        df = data
+    else:
+        raise ValueError(f"{type(data)} {repr(data)} is not supported")
+    
     x, y, cx, cy = (
         shape.left,
         shape.top,
