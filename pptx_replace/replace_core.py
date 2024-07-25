@@ -185,8 +185,7 @@ def replace_table(
         shape.height,
     )
     # t = shape.table
-    rn = len(df)
-    cn = len(df[0])
+    rn, cn = df.shape
     new_shape = slide.shapes.add_table(rn + 1, cn, x, y, cx, cy)
 
     # add headers
