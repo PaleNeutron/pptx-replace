@@ -247,24 +247,26 @@ def replace_table(
             add_column(shape.table)
     elif cn + 1 < len(shape.table.columns):
         for _ in range(len(shape.table.columns) - cn - 1):
-            remove_column(shape.table)
+            remove_column(shape.table, shape.table.columns[len(shape.table.columns) - 1])
 
     # add headers
     for c in range(cn):
         if isinstance(data, pd.DataFrame):
-            shape.table.cell(0, c + 1).text = str(df.columns[c])
+            text = str(df.columns[c])
         else:
-            shape.table.cell(0, c + 1).text = html.unescape(
+            text = html.unescape(
                 pandas_styles["head"][0][c]["display_value"]
             )
+        set_frame_text(shape.table.cell(0, c + 1).text_frame, text)
     # add index
     for r in range(rn):
         if isinstance(data, pd.DataFrame):
-            shape.table.cell(r + 1, 0).text = str(df.index[r])
+            text = str(df.index[r])
         else:
-            shape.table.cell(r + 1, 0).text = html.unescape(
+            text = html.unescape(
                 pandas_styles["body"][r][0]["display_value"]
             )
+        set_frame_text(shape.table.cell(r + 1, 0).text_frame, text)
     # add body
     for r in range(rn):
         for c in range(cn):
@@ -277,21 +279,20 @@ def replace_table(
                     pandas_styles["body"][r][c]["display_value"]
                 )
     # set font
-    if font is None:
-        font = shape.table.cell(0, 0).text_frame.paragraphs[0].runs[0].font
-    for r in range(rn + 1):
-        for c in range(cn):
-            for p in shape.table.cell(r, c).text_frame.paragraphs:
-                for run in p.runs:
-                    run.font.bold = font.bold
-                    run.font.italic = font.italic
-                    run.font.size = font.size
-                    run.font.name = font.name
-                    run.font.underline = font.underline
-    old_shape = shape._element
-    new_element = shape._element
-    old_shape.addnext(new_element)
-    old_shape.getparent().remove(old_shape)
+    if font is not None:
+        for r in range(rn + 1):
+            for c in range(cn):
+                for p in shape.table.cell(r, c).text_frame.paragraphs:
+                    for run in p.runs:
+                        run.font.bold = font.bold
+                        run.font.italic = font.italic
+                        run.font.size = font.size
+                        run.font.name = font.name
+                        run.font.underline = font.underline
+    # old_shape = shape._element
+    # new_element = shape._element
+    # old_shape.addnext(new_element)
+    # old_shape.getparent().remove(old_shape)
     return shape
 
 
