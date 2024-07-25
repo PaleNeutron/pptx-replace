@@ -322,7 +322,7 @@ def replace_table_cells(
     for r in range(1, min_row):
         for c in range(1, min_col):
             set_frame_text(
-                shape.table.cell(r + 1, c + 1).text_frame, str(df.iloc[r, c])
+                shape.table.cell(r, c).text_frame, str(df.iloc[r, c])
             )
     return shape
 
