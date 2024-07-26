@@ -262,14 +262,14 @@ def replace_table(
             text = str(df.columns[c])
         else:
             text = html.unescape(pandas_styles["head"][0][c]["display_value"])
-        set_frame_text(shape.table.cell(0, c + 1).text_frame, text)
+        set_frame_text(shape.table.cell(0, c + 1).text_frame, text, font=font)
     # add index
     for r in range(rn):
         if isinstance(data, pd.DataFrame):
             text = str(df.index[r])
         else:
             text = html.unescape(pandas_styles["body"][r][0]["display_value"])
-        set_frame_text(shape.table.cell(r + 1, 0).text_frame, text)
+        set_frame_text(shape.table.cell(r + 1, 0).text_frame, text, font=font)
     # add body
     for r in range(rn):
         for c in range(cn):
@@ -279,18 +279,8 @@ def replace_table(
                 text = str(df.iloc[r, c])
             else:
                 text = html.unescape(pandas_styles["body"][r][c]["display_value"])
-            set_frame_text(shape.table.cell(r + 1, c + 1).text_frame, text)
-    # set font
-    if font is not None:
-        for r in range(rn + 1):
-            for c in range(cn):
-                for p in shape.table.cell(r, c).text_frame.paragraphs:
-                    for run in p.runs:
-                        run.font.bold = font.bold
-                        run.font.italic = font.italic
-                        run.font.size = font.size
-                        run.font.name = font.name
-                        run.font.underline = font.underline
+            set_frame_text(shape.table.cell(r + 1, c + 1).text_frame, text, font=font)
+
     # resize shape
     if resize_x:
         # calculate new column width
