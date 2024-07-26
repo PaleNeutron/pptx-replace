@@ -1,4 +1,5 @@
-from pptx.text.text import TextFrame
+from pptx.enum.text import PP_PARAGRAPH_ALIGNMENT
+from pptx.text.text import Font, TextFrame
 
 
 def delete_paragraph(paragraph):
@@ -7,7 +8,8 @@ def delete_paragraph(paragraph):
     parent_element.remove(p)
 
 
-def set_frame_text(text_frame: TextFrame, text: str):
+
+def set_frame_text(text_frame: TextFrame, text: str, font: Font = None):
     """set text and keep font style"""
     replaced = False
     for paragraph in text_frame.paragraphs:
@@ -21,6 +23,27 @@ def set_frame_text(text_frame: TextFrame, text: str):
                     run.text = ""
             else:
                 delete_paragraph(paragraph)
-
-    if not replaced:
+        else:
+            paragraph.text = text
+    else:
         text_frame.text = text
+
+    # actually after set text, there should be only one paragraph and one run
+    if font is not None:
+        for paragraph in text_frame.paragraphs:
+            for run in paragraph.runs:
+                run.font.bold = font.bold
+                run.font.italic = font.italic
+                run.font.size = font.size
+                run.font.name = font.name
+                run.font.underline = font.underline
+                # run.font.color.rgb = font.color.rgb
+    return text_frame
+
+
+def table_alignment(table, alignment=PP_PARAGRAPH_ALIGNMENT.CENTER):
+    """set alignment of cell in table"""
+    for cell in table.iter_cells():
+        for paragraph in cell.text_frame.paragraphs:
+            paragraph.alignment = alignment
+    return table
