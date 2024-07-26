@@ -55,7 +55,7 @@ def add_row(table: Table) -> _Row:
         set_frame_text(cell.text_frame, "")
 
     table._tbl.append(new_row)
-    return table.rows[-1]
+    return table.rows[len(table.rows) - 1]
 
 
 def remove_row(table: Table, row_to_delete: _Row) -> None:
@@ -200,8 +200,8 @@ def replace_table(
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
     font=None,
-    resize_x: bool = False,
-    resize_y: bool = False,
+    resize_x: Literal['all', 'body', None] = None,
+    resize_y: Literal['all', 'body', None] = None,
 ) -> BaseShape:
     """Replace table in PPT in a page
 
@@ -293,9 +293,29 @@ def replace_table(
                         run.font.underline = font.underline
     # resize shape
     if resize_x:
-        shape.width = cx
+        # calculate new column width
+        if resize_x == 'all':
+            new_width = cx / (cn + 1)
+            for c in range(cn + 1):
+                shape.table.columns[c].width = new_width
+        elif resize_x == 'body':
+            index_with = shape.table.columns[0].width
+            body_width = cx - index_with
+            new_width = body_width / cn
+            for c in range(cn):
+                shape.table.columns[c + 1].width = new_width
     if resize_y:
-        shape.height = cy
+        # calculate new row height
+        if resize_y == 'all':
+            new_height = cy / (rn + 1)
+            for r in range(rn + 1):
+                shape.table.rows[r].height = new_height
+        elif resize_y == 'body':
+            header_height = shape.table.rows[0].height
+            body_height = cy - header_height
+            new_height = body_height / rn
+            for r in range(rn):
+                shape.table.rows[r + 1].height = new_height
      
     # old_shape = shape._element
     # new_element = shape._element
