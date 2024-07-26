@@ -297,25 +297,25 @@ def replace_table(
         if resize_x == 'all':
             new_width = cx / (cn + 1)
             for c in range(cn + 1):
-                shape.table.columns[c].width = new_width
+                shape.table.columns[c].width = int(round(new_width))
         elif resize_x == 'body':
             index_with = shape.table.columns[0].width
             body_width = cx - index_with
             new_width = body_width / cn
             for c in range(cn):
-                shape.table.columns[c + 1].width = new_width
+                shape.table.columns[c + 1].width = int(round(new_width))
     if resize_y:
         # calculate new row height
         if resize_y == 'all':
             new_height = cy / (rn + 1)
             for r in range(rn + 1):
-                shape.table.rows[r].height = new_height
+                shape.table.rows[r].height = int(round(new_height))
         elif resize_y == 'body':
             header_height = shape.table.rows[0].height
             body_height = cy - header_height
             new_height = body_height / rn
             for r in range(rn):
-                shape.table.rows[r + 1].height = new_height
+                shape.table.rows[r + 1].height = int(round(new_height))
      
     # old_shape = shape._element
     # new_element = shape._element
