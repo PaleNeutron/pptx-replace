@@ -8,7 +8,6 @@ def delete_paragraph(paragraph):
     parent_element.remove(p)
 
 
-
 def set_frame_text(text_frame: TextFrame, text: str, font: Font = None):
     """set text and keep font style"""
     replaced = False

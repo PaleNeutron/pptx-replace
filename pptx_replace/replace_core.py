@@ -200,8 +200,8 @@ def replace_table(
     shape_number: int = 0,
     order: Literal["t2b", "l2r"] = "t2b",
     font=None,
-    resize_x: Literal['all', 'body', None] = None,
-    resize_y: Literal['all', 'body', None] = None,
+    resize_x: Literal["all", "body", None] = None,
+    resize_y: Literal["all", "body", None] = None,
 ) -> BaseShape:
     """Replace table in PPT in a page
 
@@ -230,7 +230,7 @@ def replace_table(
     else:
         raise ValueError(f"{type(data)} {repr(data)} is not supported")
 
-    x, y, cx, cy = (
+    _x, _y, cx, cy = (
         shape.left,
         shape.top,
         shape.width,
@@ -284,11 +284,11 @@ def replace_table(
     # resize shape
     if resize_x:
         # calculate new column width
-        if resize_x == 'all':
+        if resize_x == "all":
             new_width = cx / (cn + 1)
             for c in range(cn + 1):
                 shape.table.columns[c].width = int(round(new_width))
-        elif resize_x == 'body':
+        elif resize_x == "body":
             index_with = shape.table.columns[0].width
             body_width = cx - index_with
             new_width = body_width / cn
@@ -296,17 +296,17 @@ def replace_table(
                 shape.table.columns[c + 1].width = int(round(new_width))
     if resize_y:
         # calculate new row height
-        if resize_y == 'all':
+        if resize_y == "all":
             new_height = cy / (rn + 1)
             for r in range(rn + 1):
                 shape.table.rows[r].height = int(round(new_height))
-        elif resize_y == 'body':
+        elif resize_y == "body":
             header_height = shape.table.rows[0].height
             body_height = cy - header_height
             new_height = body_height / rn
             for r in range(rn):
                 shape.table.rows[r + 1].height = int(round(new_height))
-     
+
     # old_shape = shape._element
     # new_element = shape._element
     # old_shape.addnext(new_element)
@@ -338,9 +338,10 @@ def replace_table_cells(
 
     for r in range(1, row_limit):
         for c in range(1, col_limit):
-            set_frame_text(shape.table.cell(r, c).text_frame, str(df.iloc[r - 1, c - 1]))
+            set_frame_text(
+                shape.table.cell(r, c).text_frame, str(df.iloc[r - 1, c - 1])
+            )
     return shape
-
 
 
 def replace_shape_with_picture(

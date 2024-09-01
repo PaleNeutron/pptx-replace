@@ -11,9 +11,11 @@ from pptx_replace import replace_picture, replace_table, replace_text
 
 out_dir = "./tests/output"
 
+
 @pytest.fixture
 def prs():
     return Presentation("tests/templates/test_template.pptx")
+
 
 @pytest.fixture(autouse=True)
 def ensure_output_dir():
@@ -21,7 +23,7 @@ def ensure_output_dir():
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    
+
 
 def test_replace_text(prs) -> None:
     replace_text(prs, "{main title}", "this is main report title")
