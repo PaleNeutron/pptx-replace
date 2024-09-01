@@ -1,10 +1,9 @@
 import html
-import re
 from copy import deepcopy
 from io import BytesIO, IOBase
 from typing import BinaryIO, List, Literal, Optional, Union
 
-from pptx.oxml.xmlchemy import OxmlElement
+from pptx.shapes.group import GroupShape
 from pptx.table import Table, _Cell, _Column, _Row
 from python_docx_replace import Paragraph as DocParagraph
 
@@ -33,17 +32,18 @@ __all__ = [
 ]
 
 
-def get_all_paragraphs(slide: Slide):
-    # get from shapes
+def get_all_paragraphs(slide: Union[Slide, GroupShape]):
     for shape in slide.shapes:
+        # get from shapes
         if shape.has_text_frame:
             yield from shape.text_frame.paragraphs
-    # get from tables
-    for shape in slide.shapes:
+        # get from tables
         if shape.has_table:
             for row in shape.table.rows:
                 for cell in row.cells:
                     yield from cell.text_frame.paragraphs
+        if isinstance(shape, GroupShape):
+            yield from get_all_paragraphs(shape)
 
 
 def add_row(table: Table) -> _Row:
